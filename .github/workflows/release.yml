@@ -3,6 +3,9 @@ name: Publish GitHub release
 on:
   push:
     tags: ['v0.3.1']
+    branches: ['main']
+    paths: ['.github/workflows/release.yml']
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -13,6 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
+          ref: refs/tags/v0.3.1
           persist-credentials: false
       - name: Package the checked-in bundles
         run: |
@@ -22,7 +26,11 @@ jobs:
       - name: Publish release and installation package
         env:
           GH_TOKEN: ${{ github.token }}
-        run: >-
-          gh release create v0.3.1 dist/dsh-appview-0.3.1.tgz
-          --verify-tag --title 'DSH AppView 0.3.1'
-          --notes-file docs/release-notes-0.3.1.md
+        run: |
+          if gh release view v0.3.1 >/dev/null 2>&1; then
+            gh release upload v0.3.1 dist/dsh-appview-0.3.1.tgz
+          else
+            gh release create v0.3.1 dist/dsh-appview-0.3.1.tgz \
+              --verify-tag --title 'DSH AppView 0.3.1' \
+              --notes-file docs/release-notes-0.3.1.md
+          fi
