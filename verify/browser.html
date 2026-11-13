@@ -1,0 +1,35 @@
+<!doctype html>
+<meta charset="utf-8"><title>DSH AppView isolated browser fixture</title>
+<style>html,body{margin:0;font:14px system-ui;background:#f5f6fa;}#panel{width:400px;height:560px;display:flex;background:white;position:relative;overflow:hidden;margin:16px;border:1px solid #ddd;}#mount{display:flex;flex:1;min-width:0;min-height:0;}</style>
+<div id="panel"><div id="mount"></div></div>
+<script src="/react.js"></script><script src="/react-dom.js"></script>
+<script>
+window.rows=[];window.__ModuleLoader__={load(row){rows.push(row);}};
+window.openCalls=[];window.registryListeners=new Set();window.generationListeners=new Set();window.moduleListeners=new Set();
+window.makeEntry=id=>({id,providerId:'fixture',kind:id,title:()=>`应用 ${id.slice(4)}`,description:()=>`测试应用 ${id}`,order:Number(id.slice(4))});
+window.entries=(window.initialIds??Array.from({length:36},(_,i)=>`app-${String(i+1).padStart(2,'0')}`)).map(makeEntry);
+window.setEntries=next=>{entries=next;for(const fn of registryListeners)fn();};
+window.loading={syncing:false,failures:[]};
+window.setLoading=next=>{loading=next;for(const fn of moduleListeners)fn();};
+window.reconnect=()=>{for(const fn of generationListeners)fn();};
+window.request=async(channel,endpoint,payload,signal)=>{
+ const response=await fetch(`${channel}/${endpoint}`,{method:'POST',signal,headers:{'content-type':'application/json'},
+ body:JSON.stringify({type:'client-request',rpcId:crypto.randomUUID(),method:endpoint,payload})});
+ if(!response.ok)throw Error(`HTTP ${response.status}`);return(await response.json()).result;
+};
+</script><script src="/client.js"></script><script>
+// Automatic JSX's (type, props, key) signature differs from createElement's children signature.
+window.jsx=(type,props,key)=>React.createElement(type,{...props,key});
+window.client=rows[0].factory(id=>id==='react'?React:id==='react-dom'?ReactDOM:id==='react/jsx-runtime'?{jsx,jsxs:jsx,Fragment:React.Fragment}:null);
+window.effects=[];window.ctx={
+ sidebarRight:{adopted:new Map(),closeIn(){},openTabIn(){}},
+ sidebarRightTabs:{guide:()=>entries,subscribe(fn){registryListeners.add(fn);return()=>registryListeners.delete(fn);}},
+ connection:{rpc:{call:request},generation:{subscribe(fn){generationListeners.add(fn);return()=>generationListeners.delete(fn);}}},
+ modules:{entries:{state:{getSnapshot:()=>loading,subscribe(fn){moduleListeners.add(fn);return()=>moduleListeners.delete(fn);}}}},
+ effect(factory){const dispose=factory();effects.push(dispose);return dispose;},
+ slots:{inject:(name,fn)=>fn(),register(definition,component){window.Body=component;return()=>{};}}
+};
+window.disposePlugin=client.apply(ctx);
+window.mount=()=>{window.tree=ReactDOM.createRoot(document.getElementById('mount'));tree.render(React.createElement(Body,{useTabInfo:()=>({tab:{actions:{openTab:(kind,options)=>openCalls.push({kind,options})}}})}));};
+mount();window.fixtureReady=true;
+</script>

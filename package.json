@@ -1,0 +1,66 @@
+{
+  "name": "dsh-appview",
+  "version": "0.3.1",
+  "description": "An app launcher for the DeepSeek Harness right sidebar with search, drag ordering, and saved layouts.",
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "THIRD_PARTY_NOTICES.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-sidebar-right",
+        "@deepseek-ai/dsh-client-connection",
+        "@deepseek-ai/dsh-client-modules"
+      ],
+      "external": []
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iceshard999/dsh-appview.git"
+  },
+  "homepage": "https://github.com/iceshard999/dsh-appview#readme",
+  "bugs": {
+    "url": "https://github.com/iceshard999/dsh-appview/issues"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "app-launcher"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "verify": "node verify/slots-check.mjs && node verify/phase-1-check.mjs && node verify/close-to-desktop-check.mjs",
+    "verify:install": "bash verify/install-check.sh",
+    "pack": "npm run build && npm run verify && mkdir -p dist && npm pack --pack-destination dist",
+    "verify:browser": "node verify/browser-check.mjs",
+    "verify:gui": "node verify/gui-smoke.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-test-renderer": "18.3.1",
+    "zod": "4.4.3"
+  }
+}

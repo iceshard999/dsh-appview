@@ -1,0 +1,4 @@
+# AppView host layout service + browser guide-page contribution.
+- insert:
+    - id: dsh-appview
+      name: 'dsh-appview'
